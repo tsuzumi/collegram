@@ -10,6 +10,7 @@ Concept of the application
     Reduce the amount of technical investment spent on producing interesting sonic ideas.
 
 How To operate the app:
+    - !!!watch out for the volume if using headphones!!!
     -click the mouse button to generate a new set of sound
     -press the "q" key on your keyboard to generate a new rythmic sequence
 
