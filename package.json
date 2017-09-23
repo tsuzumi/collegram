@@ -1,0 +1,13 @@
+{
+    "name": "hello-app",
+    "version": "1.0.0",
+    "devDependencies": {
+      "electron-packager": "^8.0.0",
+      "electron-prebuilt": "^1.4.1"
+    },
+    "dependencies": {},
+    "main": "main.js",
+    "scripts": {
+      "start": "electron ."
+    }
+  }
