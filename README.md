@@ -11,6 +11,7 @@ Concept of the application
 
 How To operate the app:
     - !!!watch out for the volume if using headphones!!!
+    -Hit "spacebar" for playback/pause
     -click the mouse button to generate a new set of sound
     -press the "q" key on your keyboard to generate a new rythmic sequence
 
