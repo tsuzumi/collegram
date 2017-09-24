@@ -1,6 +1,6 @@
 # README #
 
-This app is still in very early dev so things are not really setup for proper usage please beware.
+This app is still in very early dev so things are not setup for proper usage please beware.
 
 Collegram is an experimental percussive synthesizer made with javascript
 
@@ -26,3 +26,4 @@ TODO:
 ### How do I get set up? ###
 
 node.js + npm
+npm install soundbank-reverb
