@@ -26,13 +26,14 @@ npm install soundbank-reverb
 ### How To Use
 
 * !!!watch out for the volume if using headphones no master volume control!!!
-* Hit "space" for playback/pause
-* click the mouse button to generate a new set of sound
-* press the "q" key on your keyboard to generate a new rythmic sequence
+* play button to start playback
+* stop button to stop playback
+* randomise button creates a new set of sounds
 
 ### TODO
 
 * fine tune synthesis chain and parameter generation for a wide range of exotic percussion sounds.
-* add snapshot system that can save set of sound and set of rythms independantly.
+* create a more interesting sequencer
+* add snapshot system that can save set of sound and set of rythms independently.
 * add .wav export function.
 * create a pleasing UI.
