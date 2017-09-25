@@ -1,17 +1,20 @@
 var ctx = new AudioContext || webkitAudioContext();
 var Reverb = require('soundbank-reverb');
 var masterMix = ctx.createGain();
-masterMix.gain.value = 3;
+masterMix.gain.value = 1;
+var audioOut = ctx.destination;
 
 function Collegram(){
-    var audioOut = ctx.destination;
+
 
     var compressor = ctx.createDynamicsCompressor();
-    compressor.threshold.value = -5;
+    compressor.threshold.value = -50;
     compressor.knee.value = 40;
     compressor.ratio.value = 12;
     compressor.attack.value = 0.1;
     compressor.release.value = 0.25;
+
+    var snareSequence = [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0];
     
     masterMix.connect(compressor);
     compressor.connect(audioOut);
@@ -22,6 +25,8 @@ function Collegram(){
     var perc1 = new Percussion(ctx);
     var perc2 = new Percussion(ctx);
     var perc3 = new Percussion(ctx);
+    var hihat = new Hihat();
+    var snare = new Snaredrum();
 
     var noteTime;
     var startTime;
@@ -49,7 +54,7 @@ function Collegram(){
         })
 
         var genButton = document.createElement("BUTTON");
-        genButton.innerHTML = "randomise";
+        genButton.innerHTML = "randomise sounds";
         genButton.addEventListener('click', function(){
             perc.generateNewSound();
             perc1.generateNewSound();
@@ -57,9 +62,16 @@ function Collegram(){
             perc3.generateNewSound();
         })
 
+        var genSeq = document.createElement("BUTTON");
+        genSeq.innerHTML = "randomise sequence";
+        genSeq.addEventListener('click', function(){
+            sequencer.randomiseSequence();
+        })
+
         document.body.appendChild(playButton);
         document.body.appendChild(stopButton);
         document.body.appendChild(genButton);
+        document.body.appendChild(genSeq);
     }
     
     function handlePlay(event) {
@@ -86,6 +98,9 @@ function Collegram(){
             if(sequenceData[rhythmIndex]===1){
                 perc.bang(contextPlayTime);
             }
+            if(snareSequence[rhythmIndex]===1){
+                snare.bang(contextPlayTime);
+            }
             if(sequenceData[rhythmIndex+16]===1){
                 perc1.bang(contextPlayTime);
             }
@@ -95,6 +110,7 @@ function Collegram(){
             if(sequenceData[rhythmIndex+48]===1){
                 perc3.bang(contextPlayTime);
             }
+            hihat.bang(contextPlayTime);
             advanceTime();
         }
 
@@ -125,12 +141,25 @@ function Sequencer(length){
             else{
                 this.sequence[i] = 0;
             }
-    
+        }
+
         this.getSequence = function(){
             return this.sequence;
         }
-    }
+
+        this.randomiseSequence = function(){
+            for(var i = 0 ; i < this.length; i++){
+                var randomValue = getRandomInt(0,16);
+                if(randomValue > 12){
+                    this.sequence[i] = 1;
+                }
+                else{
+                    this.sequence[i] = 0;
+                }
+            }
+        }
 }
+
 
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;

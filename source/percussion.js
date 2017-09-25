@@ -1,4 +1,4 @@
-/*
+
 // -- White Noise Buffer -- //
 var whiteNoise = ctx.createBufferSource(),
 whiteNoiseBuffer = ctx.createBuffer(1,4096,ctx.sampleRate),
@@ -35,77 +35,64 @@ b6 = white * 0.115926;
 pinkNoise.buffer = pinkNoiseBuffer;
 pinkNoise.loop = true;
 // -- //
-class SnareDrum {
 
-    constructor(amplitude,decay){
-        this.amplitude = amplitude;
-        this.decay = decay;
+function Snaredrum(){
+    this.noise = pinkNoise;
 
-        this.noise = pinkNoise;
+    this.filter = ctx.createBiquadFilter();
+    this.filter.type = "highpass";
+    this.filter.frequency.value = 100;
+    this.filter.Q.value = 0.5;
 
-        this.filter = ctx.createBiquadFilter();
-        this.filter.type = "highpass";
-        this.filter.frequency.value = 100;
-        this.filter.Q.value = 0.5;
+    this.amp = ctx.createGain();
 
-        this.amp = ctx.createGain();
+    this.amp.gain.value = 0.0;
 
-        this.amp.gain.value = 0.0;
-  
-        this.noise.connect(this.filter);
-        this.filter.connect(this.amp);
-        this.amp.connect(out);
+    this.noise.connect(this.filter);
+    this.filter.connect(this.amp);
+    this.amp.connect(masterMix);
 
-        this.envelope = new Envelope;
-        this.envelope.setAttack( 0.01 );
-        this.envelope.setRelease( 0.1 );
-        this.envelope.connect( this.amp.gain );
+    this.envelope = new Envelope();
+    this.envelope.setAttack( 0.01 );
+    this.envelope.setRelease( 0.2 );
+    this.envelope.connect( this.amp.gain );
 
-        this.noise.start();
+    this.noise.start();
         
-    }
-
-    bang(time){
-        this.envelope.trigger(time, 1, 0);  
+    this.bang = function (time){
+        this.envelope.trigger(time, 0.08, 0);  
     }
 
 }
 
-class HiHat {
+function Hihat(){
+    this.noise = whiteNoise;
+
+    this.filter = ctx.createBiquadFilter();
+    this.filter.type = "highpass";
+    this.filter.frequency.value = 15000;
+    this.filter.Q.value = 0.5;
+
+    this.amp = ctx.createGain();
+
+    this.amp.gain.value = 0.0;
+
+    this.noise.connect(this.filter);
+    this.filter.connect(this.amp);
+    this.amp.connect(masterMix);
+
+    this.envelope = new Envelope();
+    this.envelope.setAttack( 0.01 );
+    this.envelope.setRelease( 0.02 );
+    this.envelope.connect( this.amp.gain );
+
+    this.noise.start();
     
-    constructor(amplitude,decay){
-        this.amplitude = amplitude;
-        this.decay = decay;
-
-        this.noise = whiteNoise;
-
-        this.filter = ctx.createBiquadFilter();
-        this.filter.type = "highpass";
-        this.filter.frequency.value = 15000;
-        this.filter.Q.value = 0.5;
-
-        this.amp = ctx.createGain();
-
-        this.amp.gain.value = 0.0;
-
-        this.noise.connect(this.filter);
-        this.filter.connect(this.amp);
-        this.amp.connect(out);
-
-        this.envelope = new Envelope;
-        this.envelope.setAttack( 0.01 );
-        this.envelope.setRelease( 0.02 );
-        this.envelope.connect( this.amp.gain );
-
-        this.noise.start();
+    this.bang = function (time){
+        this.envelope.trigger(time, 0.05, 0); 
     }
-
-    bang(time){
-        this.envelope.trigger(time, 0.5, 0); 
-    }
-
 }
-*/
+
 function Percussion(ctx){
     var waveTypes = ["sine","triangle","square","sawtooth"];
     var modWaveType = waveTypes[getRandomInt(0,3)];
@@ -236,8 +223,8 @@ function Percussion(ctx){
     }
 
     this.bang = function(time){
-        this.modAmpEnv.trigger(time, this.modFreq*3, 0);
-        this.pitchEnv.trigger(time, this.carFreq/2, 50);
+        this.modAmpEnv.trigger(time, this.modFreq, 0);
+        this.pitchEnv.trigger(time, this.carFreq, 50);
         this.ampEnv.trigger(time, 0.05, 0);
         this.filterEnv.trigger(time, this.filterFreq, 100);
     }
