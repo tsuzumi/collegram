@@ -8,7 +8,7 @@ Collegram is an experimental percussive synthesizer made with javascript.
 * Hide as much parameters from the user as possible.
 * Make heavy use of random based generative approach for sound synthesis.
 * The system should make it easy to navigate a wide range of sonic experiences very fast.
-* Reduce the amount of technical investment spent on producing interesting sonic ideas.
+* Reduce the amount of technical investment from the user for producing interesting sonic ideas.
 
 ## Getting Started
 
