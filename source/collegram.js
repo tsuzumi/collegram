@@ -1,7 +1,7 @@
 var ctx = new AudioContext || webkitAudioContext();
 var Reverb = require('soundbank-reverb');
 var masterMix = ctx.createGain();
-masterMix.gain.value = 1;
+masterMix.gain.value = 0.5;
 var audioOut = ctx.destination;
 
 function Collegram(){
@@ -14,7 +14,15 @@ function Collegram(){
     compressor.attack.value = 0.1;
     compressor.release.value = 0.25;
 
-    var snareSequence = [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0];
+    var snareSequence = [0,0,0,0,
+        0,0,0,0,
+        1,0,0,0,
+        0,0,0,0];
+
+    var hihatOpen = [0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,1,0];
     
     masterMix.connect(compressor);
     compressor.connect(audioOut);
@@ -32,7 +40,10 @@ function Collegram(){
     var startTime;
     var rhythmIndex;
     var tempo = 120;
+    var secondsPerBeat;
     var requestId;
+
+
 
     this.start = function(){
         perc.generateNewSound();
@@ -68,10 +79,31 @@ function Collegram(){
             sequencer.randomiseSequence();
         })
 
+        var masterVol = document.createElement("INPUT");
+        masterVol.setAttribute("type","range");
+        masterVol.setAttribute("min","0");
+        masterVol.setAttribute("max","100");
+        masterVol.oninput = function() {
+            var g = masterVol.value/100.0;
+            masterMix.gain.value = g;
+        }
+
+        var tempoControl = document.createElement("INPUT");
+        tempoControl.setAttribute("type","number");
+        tempoControl.setAttribute("min","40");
+        tempoControl.setAttribute("max","300");
+        tempoControl.setAttribute("value","120");
+        tempoControl.oninput = function(){
+            var t = tempoControl.value;
+            tempo = t;
+        }
+
         document.body.appendChild(playButton);
         document.body.appendChild(stopButton);
         document.body.appendChild(genButton);
         document.body.appendChild(genSeq);
+        document.body.appendChild(masterVol);
+        document.body.appendChild(tempoControl);
     }
     
     function handlePlay(event) {
@@ -110,7 +142,8 @@ function Collegram(){
             if(sequenceData[rhythmIndex+48]===1){
                 perc3.bang(contextPlayTime);
             }
-            hihat.bang(contextPlayTime);
+
+            hihat.bang(contextPlayTime,hihatOpen[rhythmIndex]);
             advanceTime();
         }
 
@@ -118,7 +151,7 @@ function Collegram(){
     }
 
     function advanceTime() {
-        var secondsPerBeat = 60.0 / tempo;
+        secondsPerBeat = 60.0 / tempo;
 
         rhythmIndex++;
         if (rhythmIndex == 16) {

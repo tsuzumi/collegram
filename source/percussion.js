@@ -88,8 +88,15 @@ function Hihat(){
 
     this.noise.start();
     
-    this.bang = function (time){
-        this.envelope.trigger(time, 0.05, 0); 
+    this.bang = function (time,open){
+        if(open===0){
+            this.envelope.setRelease( 0.02 );
+            this.envelope.trigger(time, 0.125, 0); 
+        }
+        else{
+            this.envelope.setRelease( 0.5 );
+            this.envelope.trigger(time, 0.07, 0); 
+        }
     }
 }
 
@@ -98,7 +105,10 @@ function Percussion(ctx){
     var modWaveType = waveTypes[getRandomInt(0,3)];
     var carWaveType = waveTypes[getRandomInt(0,3)];
 
-    this.modFreq = getRandomArbitrary(100,880);
+    var modAmpPeak = getRandomArbitrary(50,5000);
+    var pitchPeak = getRandomArbitrary(50,5000);
+
+    this.modFreq = getRandomArbitrary(100,4186);
     this.carFreq = getRandomArbitrary(440,880);
     this.filterFreq = getRandomArbitrary(100,15000);
 
@@ -154,12 +164,12 @@ function Percussion(ctx){
     this.filter.type = "lowpass";
     this.filter.frequency.value = this.filterFreq;
     this.filter.Q.value = 0.5;
-
+    /*
     this.filterEnv = new Envelope(ctx);
     this.filterEnv.setAttack( this.filterEnvAttack );
     this.filterEnv.setRelease( this.filterEnvRelease );
     this.filterEnv.connect( this.filter.frequency );
-
+    */
     this.postReverb = Reverb(ctx);
     this.postReverb.time = getRandomArbitrary(0.5,2); //seconds
     this.postReverb.wet.value = Math.random();
@@ -182,8 +192,8 @@ function Percussion(ctx){
     this.generateNewSound = function(){
         this.modWaveType = waveTypes[getRandomInt(0,3)];
         this.carWaveType = waveTypes[getRandomInt(0,3)];
-        this.modFreq = getRandomArbitrary(440,3000);
-        this.carFreq = getRandomArbitrary(440,1000);
+        this.modFreq = getRandomArbitrary(100,3000);
+        this.carFreq = getRandomArbitrary(100,1000);
 
         this.modulator.frequency.value = this.modFreq;
         this.modulator.type = modWaveType;
@@ -191,41 +201,43 @@ function Percussion(ctx){
         this.carrier.frequency.value = this.carFreq;
         this.carrier.type = carWaveType;
 
-        this.modAmpEnvAttack = 0.01;
-        this.modAmpEnvRelease = getRandomArbitrary(0.01,0.01);
+        this.modAmpEnvAttack = 0.001;
+        this.modAmpEnvRelease = getRandomArbitrary(0.01,0.1);
         this.modAmpEnv.setAttack( this.modAmpEnvAttack );
         this.modAmpEnv.setRelease( this.modAmpEnvRelease );
 
-        this.pitchEnvAttack = 0.00;
-        this.pitchEnvRelease = getRandomArbitrary(0.01,0.1);
+        this.pitchEnvAttack = 0.0;
+        this.pitchEnvRelease = getRandomArbitrary(0.01,0.05);
         this.pitchEnv.setAttack( this.pitchEnvAttack );
         this.pitchEnv.setRelease( this.pitchEnvRelease );
 
-        this.ampEnvAttack = 0.01;
+        this.ampEnvAttack = 0.001;
         this.ampEnvRelease = getRandomArbitrary(0.01,0.7);
         this.ampEnv.setAttack( this.ampEnvAttack );
         this.ampEnv.setRelease( this.ampEnvRelease );
 
-        this.reverb.time = getRandomArbitrary(0.5,2); //seconds
+        this.reverb.time = getRandomArbitrary(0.01,0.5); //seconds
         this.reverb.wet.value = Math.random();
         this.reverb.dry.value = Math.random();
 
-        this.reverb.cutoff.value = getRandomInt(700,6000); //Hz
+        this.reverb.cutoff.value = getRandomInt(700,22000); //Hz
 
-        this.filterFreq = getRandomArbitrary(100,15000);
+        this.filterFreq = getRandomArbitrary(350,15000);
         this.filter.frequency.value = this.filterFreq;
 
-        this.postReverb.time = getRandomArbitrary(0.5,2); //seconds
+        this.postReverb.time = getRandomArbitrary(0.1,1); //seconds
         this.postReverb.wet.value = Math.random();
         this.postReverb.dry.value = Math.random();
 
-        this.postReverb.cutoff.value = getRandomInt(700,6000); //Hz
+        this.postReverb.cutoff.value = getRandomInt(700,22000); //Hz
+
+        modAmpPeak = getRandomArbitrary(50,5000);
+        pitchPeak = getRandomArbitrary(this.carFreq,this.carFreq*2);
     }
 
     this.bang = function(time){
-        this.modAmpEnv.trigger(time, this.modFreq, 0);
-        this.pitchEnv.trigger(time, this.carFreq, 50);
+        this.modAmpEnv.trigger(time, modAmpPeak, 0);
+        this.pitchEnv.trigger(time, pitchPeak, 50);
         this.ampEnv.trigger(time, 0.05, 0);
-        this.filterEnv.trigger(time, this.filterFreq, 100);
     }
 }
