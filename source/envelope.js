@@ -1,13 +1,14 @@
 function Envelope(){
-    this.attackTime = 0.1;
-    this.releaseTime = 0.1;
+    var attackTime = 0.1;
+    var releaseTime = 0.1;
+    this.param;
 
     this.setAttack = function ( attack ) {
-        this.attackTime = attack;
+        attackTime = attack;
     }
 
     this.setRelease = function ( release ) {
-        this.releaseTime = release;
+        releaseTime = release;
     }
 
     this.connect = function(param){
@@ -17,7 +18,7 @@ function Envelope(){
     this.trigger = function(time,startValue,endValue){
         this.param.cancelScheduledValues( time );
         this.param.setValueAtTime( 0, time );
-        this.param.linearRampToValueAtTime( startValue , time + this.attackTime );
-        this.param.linearRampToValueAtTime( endValue , time + this.attackTime + this.releaseTime );
+        this.param.linearRampToValueAtTime( startValue , time + attackTime );
+        this.param.linearRampToValueAtTime( endValue , time + attackTime + releaseTime );
     }
 }

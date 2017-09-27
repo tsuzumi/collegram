@@ -33,6 +33,7 @@ function Collegram(){
     var perc1 = new Percussion(ctx);
     var perc2 = new Percussion(ctx);
     var perc3 = new Percussion(ctx);
+
     var hihat = new Hihat();
     var snare = new Snaredrum();
 
@@ -42,8 +43,6 @@ function Collegram(){
     var tempo = 120;
     var secondsPerBeat;
     var requestId;
-
-
 
     this.start = function(){
         perc.generateNewSound();
