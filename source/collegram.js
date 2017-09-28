@@ -6,7 +6,6 @@ var audioOut = ctx.destination;
 
 function Collegram(){
 
-
     var compressor = ctx.createDynamicsCompressor();
     compressor.threshold.value = -50;
     compressor.knee.value = 40;
@@ -14,20 +13,40 @@ function Collegram(){
     compressor.attack.value = 0.1;
     compressor.release.value = 0.25;
 
-    var snareSequence = [0,0,0,0,
-        0,0,0,0,
-        1,0,0,0,
-        0,0,0,0];
+    var snareSequence = 
+    [0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    1,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0];
 
-    var hihatOpen = [0,0,0,0,
-        0,0,0,0,
-        0,0,0,0,
-        0,0,1,0];
+    var hihatSeq = 
+    [1,1,1,1,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    1,1,1,1,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,1,0];
+
+    var hihatOpen = 
+    [0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,0,0,
+    0,0,1,0];
     
     masterMix.connect(compressor);
     compressor.connect(audioOut);
 
-    var sequencer = new Sequencer(64);
+    var sequencer = new Sequencer(128);
 
     var perc = new Percussion(ctx);
     var perc1 = new Percussion(ctx);
@@ -41,15 +60,16 @@ function Collegram(){
     var startTime;
     var rhythmIndex;
     var tempo = 120;
+    var loopLength = 32;
     var secondsPerBeat;
     var requestId;
 
     this.start = function(){
+
         perc.generateNewSound();
         perc1.generateNewSound();
         perc2.generateNewSound();
         perc3.generateNewSound();
-
         
         var playButton = document.createElement("BUTTON");
         playButton.innerHTML = "play";
@@ -129,23 +149,24 @@ function Collegram(){
             if(sequenceData[rhythmIndex]===1){
                 perc.bang(contextPlayTime);
             }
-            if(snareSequence[rhythmIndex]===1){
-                snare.bang(contextPlayTime);
-            }
-            if(sequenceData[rhythmIndex+16]===1){
+            if(sequenceData[rhythmIndex+32]===1){
                 perc1.bang(contextPlayTime);
             }
-            if(sequenceData[rhythmIndex+32]===1){
+            if(sequenceData[rhythmIndex+64]===1){
                 perc2.bang(contextPlayTime);
             }
-            if(sequenceData[rhythmIndex+48]===1){
+            if(sequenceData[rhythmIndex+96]===1){
                 perc3.bang(contextPlayTime);
             }
 
-            hihat.bang(contextPlayTime,hihatOpen[rhythmIndex]);
+            if(snareSequence[rhythmIndex]===1){
+                snare.bang(contextPlayTime);
+            }
+            if(hihatSeq[rhythmIndex]===1){
+                hihat.bang(contextPlayTime,hihatOpen[rhythmIndex])
+            }
             advanceTime();
         }
-
         requestId = requestAnimationFrame(schedule);
     }
 
@@ -153,7 +174,7 @@ function Collegram(){
         secondsPerBeat = 60.0 / tempo;
 
         rhythmIndex++;
-        if (rhythmIndex == 16) {
+        if (rhythmIndex == loopLength) {
             rhythmIndex = 0;
         }
 
@@ -162,12 +183,11 @@ function Collegram(){
 }
 
 function Sequencer(length){
-    
         this.sequence = [];
         this.length = length;
         for(var i = 0 ; i < this.length; i++){
             var randomValue = getRandomInt(0,16);
-            if(randomValue > 12){
+            if(randomValue > 14){
                 this.sequence[i] = 1;
             }
             else{
