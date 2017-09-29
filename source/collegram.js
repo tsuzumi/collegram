@@ -1,5 +1,19 @@
-var ctx = new AudioContext || webkitAudioContext();
+
 var Reverb = require('soundbank-reverb');
+
+try {
+    var ctx = new AudioContext || webkitAudioContext();
+    var Reverb = require('soundbank-reverb');
+} catch (e) {
+    console.log("No Web Audio API support");
+}
+
+try{
+
+}catch (e){
+    console.log("You need to install soundbank reverb using : 'npm install soundbank-reverb'");
+}
+
 var masterMix = ctx.createGain();
 masterMix.gain.value = 0.5;
 var audioOut = ctx.destination;
@@ -46,12 +60,15 @@ function Collegram(){
     masterMix.connect(compressor);
     compressor.connect(audioOut);
 
-    var sequencer = new Sequencer(128);
+    var channelCount = 8;
 
-    var perc = new Percussion(ctx);
-    var perc1 = new Percussion(ctx);
-    var perc2 = new Percussion(ctx);
-    var perc3 = new Percussion(ctx);
+    var sequencer = new Sequencer(channelCount*32);
+
+    var percs = new Array(channelCount);
+    for(var i = 0; i < channelCount; i++){
+        var p = new Percussion();
+        percs[i] = p;
+    }
 
     var hihat = new Hihat();
     var snare = new Snaredrum();
@@ -61,16 +78,73 @@ function Collegram(){
     var rhythmIndex;
     var tempo = 120;
     var loopLength = 32;
+ 
     var secondsPerBeat;
     var requestId;
 
     this.start = function(){
 
-        perc.generateNewSound();
-        perc1.generateNewSound();
-        perc2.generateNewSound();
-        perc3.generateNewSound();
-        
+        percs.forEach(
+            function(item){
+                item.generateNewSound();
+            }
+        )
+
+        buildUI();
+    }
+    
+    function handlePlay(event) {
+        noteTime = 0.0;
+        startTime = ctx.currentTime + 0.005;
+        rhythmIndex = 0;
+        schedule();
+    }
+
+    function handleStop(event) {
+        cancelAnimationFrame(requestId);
+    }
+
+    function schedule(){
+        var currentTime = ctx.currentTime;
+
+        currentTime -= startTime;
+
+        var sequenceData = sequencer.getSequence();
+
+        while (noteTime < currentTime + 0.200) {
+            var contextPlayTime = noteTime + startTime;
+            
+            for(var i = 0 ; i < channelCount; i++){
+                var offset = i*loopLength;
+                if(sequenceData[rhythmIndex+offset]===1){
+                    percs[i].bang(contextPlayTime);
+                }
+            }
+            
+            if(snareSequence[rhythmIndex]===1){
+                snare.bang(contextPlayTime);
+            }
+            if(hihatSeq[rhythmIndex]===1){
+                hihat.bang(contextPlayTime,hihatOpen[rhythmIndex])
+            }
+            
+            advanceTime();
+        }
+        requestId = requestAnimationFrame(schedule);
+    }
+
+    function advanceTime() {
+        secondsPerBeat = 60.0 / tempo;
+
+        rhythmIndex++;
+        if (rhythmIndex == loopLength) {
+            rhythmIndex = 0;
+        }
+
+        noteTime += 0.25 * secondsPerBeat;
+    }
+
+    function buildUI(){
         var playButton = document.createElement("BUTTON");
         playButton.innerHTML = "play";
         playButton.addEventListener('click', function(){
@@ -86,10 +160,12 @@ function Collegram(){
         var genButton = document.createElement("BUTTON");
         genButton.innerHTML = "randomise sounds";
         genButton.addEventListener('click', function(){
-            perc.generateNewSound();
-            perc1.generateNewSound();
-            perc2.generateNewSound();
-            perc3.generateNewSound();
+
+            percs.forEach(
+                function(item){
+                    item.generateNewSound();
+                }
+            )
         })
 
         var genSeq = document.createElement("BUTTON");
@@ -124,63 +200,6 @@ function Collegram(){
         document.body.appendChild(masterVol);
         document.body.appendChild(tempoControl);
     }
-    
-    function handlePlay(event) {
-        noteTime = 0.0;
-        startTime = ctx.currentTime + 0.005;
-        rhythmIndex = 0;
-        schedule();
-    }
-
-    function handleStop(event) {
-        cancelAnimationFrame(requestId);
-    }
-
-    function schedule(){
-        var currentTime = ctx.currentTime;
-
-        currentTime -= startTime;
-
-        var sequenceData = sequencer.getSequence();
-
-        while (noteTime < currentTime + 0.200) {
-            var contextPlayTime = noteTime + startTime;
-
-            if(sequenceData[rhythmIndex]===1){
-                perc.bang(contextPlayTime);
-            }
-            if(sequenceData[rhythmIndex+32]===1){
-                perc1.bang(contextPlayTime);
-            }
-            if(sequenceData[rhythmIndex+64]===1){
-                perc2.bang(contextPlayTime);
-            }
-            if(sequenceData[rhythmIndex+96]===1){
-                perc3.bang(contextPlayTime);
-            }
-
-            if(snareSequence[rhythmIndex]===1){
-                snare.bang(contextPlayTime);
-            }
-            if(hihatSeq[rhythmIndex]===1){
-                hihat.bang(contextPlayTime,hihatOpen[rhythmIndex])
-            }
-            advanceTime();
-        }
-        requestId = requestAnimationFrame(schedule);
-    }
-
-    function advanceTime() {
-        console.log(tempo);
-        secondsPerBeat = 60.0 / tempo;
-
-        rhythmIndex++;
-        if (rhythmIndex == loopLength) {
-            rhythmIndex = 0;
-        }
-
-        noteTime += 0.25 * secondsPerBeat;
-    }
 }
 
 function Sequencer(length){
@@ -212,7 +231,6 @@ function Sequencer(length){
             }
         }
 }
-
 
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;

@@ -109,8 +109,7 @@ function Hihat(){
     }
 }
 
-function Percussion(ctx){
-
+function Percussion(){
     var waveTypes = ["sine","triangle","square","sawtooth"];
     var filterTypes = ["highpass","lowpass","bandpass"];
 
