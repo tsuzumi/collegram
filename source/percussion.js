@@ -168,7 +168,7 @@ function Percussion(ctx){
 
     reverb.time = getRandomArbitrary(0.5,1); 
     reverb.wet.value = Math.random();
-    reverb.dry.value = 0.1
+    reverb.dry.value = 1
 
     reverb.filterType = 'lowpass';
     reverb.cutoff.value = getRandomInt(700,22000); 
@@ -179,7 +179,7 @@ function Percussion(ctx){
 
     postReverb.time = getRandomArbitrary(0.5,1); 
     postReverb.wet.value = Math.random();
-    postReverb.dry.value = 0.1
+    postReverb.dry.value = 1
 
     postReverb.filterType = filterTypes[getRandomInt(0,2)];
     postReverb.cutoff.value = getRandomInt(700,22000); 

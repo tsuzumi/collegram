@@ -16,22 +16,22 @@ function Collegram(){
     var snareSequence = 
     [0,0,0,0,
     0,0,0,0,
-    0,0,0,0,
-    0,0,0,0,
     1,0,0,0,
     0,0,0,0,
     0,0,0,0,
+    0,0,0,0,
+    1,0,0,0,
     0,0,0,0];
 
     var hihatSeq = 
     [1,1,1,1,
-    0,0,0,0,
-    0,0,0,0,
-    0,0,0,0,
     1,1,1,1,
-    0,0,0,0,
-    0,0,0,0,
-    0,0,1,0];
+    1,1,1,1,
+    1,1,1,1,
+    1,1,1,1,
+    1,1,1,1,
+    1,1,1,1,
+    1,1,1,1];
 
     var hihatOpen = 
     [0,0,0,0,
@@ -41,7 +41,7 @@ function Collegram(){
     0,0,0,0,
     0,0,0,0,
     0,0,0,0,
-    0,0,1,0];
+    0,0,0,0];
     
     masterMix.connect(compressor);
     compressor.connect(audioOut);
@@ -187,7 +187,7 @@ function Sequencer(length){
         this.length = length;
         for(var i = 0 ; i < this.length; i++){
             var randomValue = getRandomInt(0,16);
-            if(randomValue > 14){
+            if(randomValue > 15){
                 this.sequence[i] = 1;
             }
             else{
