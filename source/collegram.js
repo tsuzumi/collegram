@@ -112,7 +112,7 @@ function Collegram(){
         tempoControl.setAttribute("min","40");
         tempoControl.setAttribute("max","300");
         tempoControl.setAttribute("value","120");
-        tempoControl.oninput = function(){
+        tempoControl.onchange = function(){
             var t = tempoControl.value;
             tempo = t;
         }
@@ -171,6 +171,7 @@ function Collegram(){
     }
 
     function advanceTime() {
+        console.log(tempo);
         secondsPerBeat = 60.0 / tempo;
 
         rhythmIndex++;
@@ -187,7 +188,7 @@ function Sequencer(length){
         this.length = length;
         for(var i = 0 ; i < this.length; i++){
             var randomValue = getRandomInt(0,16);
-            if(randomValue > 15){
+            if(randomValue > 10){
                 this.sequence[i] = 1;
             }
             else{
@@ -202,7 +203,7 @@ function Sequencer(length){
         this.randomiseSequence = function(){
             for(var i = 0 ; i < this.length; i++){
                 var randomValue = getRandomInt(0,16);
-                if(randomValue > 12){
+                if(randomValue > 10){
                     this.sequence[i] = 1;
                 }
                 else{

@@ -29,7 +29,7 @@ npm install soundbank-reverb
 * stop button to stop playback
 * randomise button creates a new set of sounds
 * slider controls Master volume output
-* numeric field is for BPM (bug: need to hit play again after changing the tempo)
+* numeric field is for BPM
 
 ### TODO
 
