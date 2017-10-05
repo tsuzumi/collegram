@@ -215,12 +215,16 @@ function Collegram(){
             var reader = new FileReader();
             reader.onload = function(){
                 var buffer = new Buffer(reader.result);
+                try{
                 fs.writeFile("./source/wav/hello.wav", buffer, {}, (err, res) => {
                     if(err){
                         console.error(err);
                         return;
                     }
-                })
+                });
+                }catch(e){
+                    console.log(e);
+                }
             }
             reader.readAsArrayBuffer(blob)
         }
