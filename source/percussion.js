@@ -109,142 +109,157 @@ function Hihat(){
     }
 }
 
-function Percussion(){
-    var waveTypes = ["sine","triangle","square","sawtooth"];
-    var filterTypes = ["highpass","lowpass","bandpass"];
+class Percussion{
+    constructor(){
 
-    var modWaveType = waveTypes[getRandomInt(0,3)];
-    var carWaveType = waveTypes[getRandomInt(0,3)];
+        // node creation
+        this.modulator = ctx.createOscillator();
+        this.carrier = ctx.createOscillator();
+        this.modAmp = ctx.createGain();
+        this.amp = ctx.createGain();
 
-    var modAmpPeak = getRandomArbitrary(50,5000);
-    var pitchPeak = getRandomArbitrary(50,5000);
+        this.modAmpEnv = new Envelope();
+        this.pitchEnv = new Envelope();
+        this.ampEnv = new Envelope();
+        this.reverb = Reverb(ctx);
+        this.filter = ctx.createBiquadFilter();
+        this.postReverb = Reverb(ctx);
+        //---------------------------->
+        //param
+        this.waveTypes = ["sine","triangle","square","sawtooth"];
+        this.filterTypes = ["highpass","lowpass","bandpass"];
 
-    var modFreq = getRandomArbitrary(50,6000);
-    var carFreq = getRandomArbitrary(100,880);
-    var filterFreq = getRandomArbitrary(100,15000);
+        this.modWaveType = this.waveTypes[getRandomInt(0,3)];
+        this.carWaveType = this.waveTypes[getRandomInt(0,3)];
 
-    var modAmpEnvAttack = 0.001;
-    var modAmpEnvRelease = getRandomArbitrary(0.01,0.05);
+        this.modFreq = getRandomArbitrary(50,6000);
+        this.carFreq = getRandomArbitrary(50,6000);
 
-    var pitchEnvAttack = 0.00;
-    var pitchEnvRelease = getRandomArbitrary(0.01,0.02);
+        this.filterFreq = getRandomArbitrary(100,15000);
 
-    var ampEnvAttack = 0.001;
-    var ampEnvRelease = getRandomArbitrary(0.01,1);
-
-    var modulator = ctx.createOscillator();
-    var carrier = ctx.createOscillator();
-    var modAmp = ctx.createGain();
-    var amp = ctx.createGain();
-
-    var modAmpEnv = new Envelope();
-    var pitchEnv = new Envelope();
-    var ampEnv = new Envelope();
-    var reverb = Reverb(ctx);
-    var postReverb = Reverb(ctx);
-
-    var filter = ctx.createBiquadFilter();
-
-    modulator.frequency.value = modFreq;
-    modulator.type = modWaveType;
-    modAmp.gain.value = 0;
-
-    carrier.frequency.value = carFreq;
-    carrier.type = carWaveType;
-    amp.gain.value = 0;
-
-    modAmpEnv.setAttack( modAmpEnvAttack );
-    modAmpEnv.setRelease( modAmpEnvRelease );
-    modAmpEnv.connect( modAmp.gain );
-
-    pitchEnv.setAttack( pitchEnvAttack );
-    pitchEnv.setRelease( pitchEnvRelease );
-    pitchEnv.connect( carrier.frequency );
-
-    ampEnv.setAttack( ampEnvAttack );
-    ampEnv.setRelease( ampEnvRelease );
-    ampEnv.connect( amp.gain );
-
-    reverb.time = getRandomArbitrary(0.5,1); 
-    reverb.wet.value = Math.random();
-    reverb.dry.value = 1
-
-    reverb.filterType = 'lowpass';
-    reverb.cutoff.value = getRandomInt(700,22000); 
-
-    filter.type = "lowpass";
-    filter.frequency.value = filterFreq;
-    filter.Q.value = 0.5;
-
-    postReverb.time = getRandomArbitrary(0.5,1); 
-    postReverb.wet.value = Math.random();
-    postReverb.dry.value = 1
-
-    postReverb.filterType = filterTypes[getRandomInt(0,2)];
-    postReverb.cutoff.value = getRandomInt(700,22000); 
-
-    modulator.connect(modAmp);
-    modAmp.connect(carrier.frequency);
-    carrier.connect(amp);
-    amp.connect(reverb);
-    reverb.connect(filter);
-    filter.connect(postReverb);
-    postReverb.connect(masterMix);
-
-    modulator.start();
-    carrier.start();
-
-    this.generateNewSound = function(){
-        modWaveType = waveTypes[getRandomInt(0,3)];
-        carWaveType = waveTypes[getRandomInt(0,3)];
-
-        modFreq = getRandomArbitrary(50,6000);
-        carFreq = getRandomArbitrary(100,880);
-        filterFreq = getRandomArbitrary(100,15000);
-
-        modulator.frequency.value = modFreq;
-        modulator.type = modWaveType;
-
-        carrier.frequency.value = carFreq;
-        carrier.type = carWaveType;
-
-        modAmpEnvAttack = 0.001;
-        modAmpEnvRelease = getRandomArbitrary(0.01,0.05);
-        modAmpEnv.setAttack( modAmpEnvAttack );
-        modAmpEnv.setRelease( modAmpEnvRelease );
-
-        pitchEnvAttack = 0.0;
-        pitchEnvRelease = getRandomArbitrary(0.01,0.02);
-        pitchEnv.setAttack( pitchEnvAttack );
-        pitchEnv.setRelease( pitchEnvRelease );
-
-        ampEnvAttack = 0.001;
-        var ampEnvRelease = getRandomArbitrary(0.01,1);
-        ampEnv.setAttack( ampEnvAttack );
-        ampEnv.setRelease( ampEnvRelease );
-
-        reverb.time = getRandomArbitrary(0.5,1); 
-        reverb.wet.value = Math.random();
-        reverb.dry.value = Math.random();
-
-        reverb.cutoff.value = getRandomInt(700,22000); 
-
-        filter.frequency.value = filterFreq;
-
-        postReverb.time = getRandomArbitrary(0.5,2); 
-        postReverb.wet.value = Math.random();
-        postReverb.dry.value = Math.random();
+        this.modAmpEnvAttack = 0.001;
+        this.modAmpEnvRelease = getRandomArbitrary(0.01,0.05);
     
-        postReverb.filterType = filterTypes[getRandomInt(0,2)];
-        postReverb.cutoff.value = getRandomInt(700,22000); 
+        this.pitchEnvAttack = 0.00;
+        this.pitchEnvRelease = getRandomArbitrary(0.01,0.02);
+    
+        this.ampEnvAttack = 0.001;
+        this.ampEnvRelease = getRandomArbitrary(0.01,0.3);
 
-        modAmpPeak = getRandomArbitrary(50,5000);
-        pitchPeak = getRandomArbitrary(carFreq,carFreq*2);
+        this.modAmpPeak = getRandomArbitrary(500,5000);
+        this.pitchPeak = getRandomArbitrary(this.carFreq,this.carFreq*2);
+        //---------------------------->
+        // node setup
+        this.modulator.frequency.value = this.modFreq;
+        this.modulator.type = this.modWaveType;
+        this.modAmp.gain.value = 0;
+    
+        this.carrier.frequency.value = this.carFreq;
+        this.carrier.type = this.carWaveType;
+        this.amp.gain.value = 0;
+
+        this.modAmpEnv.setAttack( this.modAmpEnvAttack );
+        this.modAmpEnv.setRelease( this.modAmpEnvRelease );
+        this.modAmpEnv.connect( this.modAmp.gain );
+    
+        this.pitchEnv.setAttack( this.pitchEnvAttack );
+        this.pitchEnv.setRelease( this.pitchEnvRelease );
+        this.pitchEnv.connect( this.carrier.frequency );
+    
+        this.ampEnv.setAttack( this.ampEnvAttack );
+        this.ampEnv.setRelease( this.ampEnvRelease );
+        this.ampEnv.connect( this.amp.gain );
+        //---------------------------->
+        // dsp
+        this.reverb.time = getRandomArbitrary(0.5,1); 
+        this.reverb.filterType = this.filterTypes[getRandomInt(0,2)];
+        this.reverb.cutoff.value = getRandomInt(700,22000);
+
+        this.reverb.wet.value = Math.random();
+        this.reverb.dry.value = 1;
+    
+        this.filter.type = "lowpass";
+        this.filter.frequency.value = this.filterFreq;
+        this.filter.Q.value = 0.5;
+    
+        this.postReverb.time = getRandomArbitrary(0.5,1); 
+
+        this.postReverb.filterType = this.filterTypes[getRandomInt(0,2)];
+        this.postReverb.cutoff.value = getRandomInt(700,22000);
+
+        this.postReverb.wet.value = Math.random();
+        this.postReverb.dry.value = 1;
+        //---------------------------->
+        // node connection
+        this.modulator.connect(this.modAmp);
+        this.modAmp.connect(this.carrier.frequency);
+        this.carrier.connect(this.amp);
+        this.amp.connect(this.reverb);
+        
+        this.reverb.connect(this.filter);
+        this.filter.connect(this.postReverb);
+        this.postReverb.connect(masterMix);
+    
+        this.modulator.start();
+        this.carrier.start();
     }
 
-    this.bang = function(time){
-        modAmpEnv.trigger(time, modAmpPeak, 0);
-        pitchEnv.trigger(time, pitchPeak, 50);
-        ampEnv.trigger(time, 0.05, 0);
+    generateNewSound(){
+        this.modWaveType = this.waveTypes[getRandomInt(0,3)];
+        this.carWaveType = this.waveTypes[getRandomInt(0,3)];
+        this.modulator.type = this.modWaveType;
+        this.carrier.type = this.carWaveType;
+
+        this.modFreq = getRandomArbitrary(50,6000);
+        this.carFreq = getRandomArbitrary(50,6000);
+        this.modulator.frequency.value = this.modFreq;
+        this.carrier.frequency.value = this.carFreq;
+
+        this.modAmpEnvAttack = 0.001;
+        this.modAmpEnvRelease = getRandomArbitrary(0.01,0.05);
+    
+        this.pitchEnvAttack = 0.00;
+        this.pitchEnvRelease = getRandomArbitrary(0.01,0.02);
+    
+        this.ampEnvAttack = 0.001;
+        this.ampEnvRelease = getRandomArbitrary(0.01,0.3);
+
+        this.modAmpEnv.setAttack( this.modAmpEnvAttack );
+        this.modAmpEnv.setRelease( this.modAmpEnvRelease );
+
+        this.pitchEnv.setAttack( this.pitchEnvAttack );
+        this.pitchEnv.setRelease( this.pitchEnvRelease );
+
+        this.ampEnv.setAttack( this.ampEnvAttack );
+        this.ampEnv.setRelease( this.ampEnvRelease );
+
+        this.reverb.time = getRandomArbitrary(0.1,1);
+        this.reverb.filterType = this.filterTypes[getRandomInt(0,2)];
+        this.reverb.cutoff.value = getRandomInt(700,22000); 
+
+        this.reverb.wet.value = Math.random();
+        this.reverb.dry.value = 1;
+
+        this.filterFreq = getRandomArbitrary(100,15000);
+        this.filter.frequency.value = this.filterFreq;
+        
+        this.postReverb.time = getRandomArbitrary(0.5,1);
+        this.postReverb.filterType = this.filterTypes[getRandomInt(0,2)];
+        this.postReverb.cutoff.value = getRandomInt(700,22000);
+
+        this.postReverb.wet.value = Math.random();
+        this.postReverb.dry.value = 1;
+
+        this.modAmpPeak = getRandomArbitrary(500,5000);
+        this.pitchPeak = getRandomArbitrary(this.carFreq,this.carFreq*2);
+
+        //console.log(JSON.stringify(this));
+    }
+
+    bang(time){
+        this.modAmpEnv.trigger(time, this.modAmpPeak, 0);
+        this.pitchEnv.trigger(time, this.pitchPeak, 50);
+        this.ampEnv.trigger(time, 0.125, 0);
     }
 }
+

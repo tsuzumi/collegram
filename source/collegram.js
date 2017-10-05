@@ -1,41 +1,47 @@
-
-var Reverb = require('soundbank-reverb');
-
 try {
     var ctx = new AudioContext || webkitAudioContext();
-    var Reverb = require('soundbank-reverb');
 } catch (e) {
     console.log("No Web Audio API support");
 }
 
 try{
-
+    var Reverb = require("soundbank-reverb");
 }catch (e){
-    console.log("You need to install soundbank reverb using : 'npm install soundbank-reverb'");
+    console.log(e);
 }
 
-var masterMix = ctx.createGain();
-masterMix.gain.value = 0.5;
+try{
+    require("web-audio-recorder-js");
+}catch (e){
+    console.log(e);
+}
+
+try{
+    var fs = require('fs');
+}catch(e){
+    console.log(e);
+}
+
 var audioOut = ctx.destination;
+
+var masterMix = ctx.createGain();
+masterMix.gain.value = 0.25;
+
+audioRecorder = new WebAudioRecorder(masterMix,{
+    workerDir: "../node_modules/web-audio-recorder-js/lib-minified/"     
+});
 
 function Collegram(){
 
-    var compressor = ctx.createDynamicsCompressor();
-    compressor.threshold.value = -50;
-    compressor.knee.value = 40;
-    compressor.ratio.value = 12;
-    compressor.attack.value = 0.1;
-    compressor.release.value = 0.25;
-
     var snareSequence = 
     [0,0,0,0,
+    1,0,0,0,
     0,0,0,0,
     1,0,0,0,
     0,0,0,0,
-    0,0,0,0,
-    0,0,0,0,
     1,0,0,0,
-    0,0,0,0];
+    0,0,0,0,
+    1,0,0,0];
 
     var hihatSeq = 
     [1,1,1,1,
@@ -57,8 +63,7 @@ function Collegram(){
     0,0,0,0,
     0,0,0,0];
     
-    masterMix.connect(compressor);
-    compressor.connect(audioOut);
+    masterMix.connect(audioOut);
 
     var channelCount = 8;
 
@@ -83,19 +88,17 @@ function Collegram(){
     var requestId;
 
     this.start = function(){
-
         percs.forEach(
             function(item){
                 item.generateNewSound();
             }
         )
-
         buildUI();
     }
     
     function handlePlay(event) {
         noteTime = 0.0;
-        startTime = ctx.currentTime + 0.005;
+        startTime = ctx.currentTime + 0.05;
         rhythmIndex = 0;
         schedule();
     }
@@ -106,12 +109,10 @@ function Collegram(){
 
     function schedule(){
         var currentTime = ctx.currentTime;
-
         currentTime -= startTime;
-
         var sequenceData = sequencer.getSequence();
 
-        while (noteTime < currentTime + 0.200) {
+        while (noteTime < currentTime + 0.5) {
             var contextPlayTime = noteTime + startTime;
             
             for(var i = 0 ; i < channelCount; i++){
@@ -120,14 +121,12 @@ function Collegram(){
                     percs[i].bang(contextPlayTime);
                 }
             }
-            
             if(snareSequence[rhythmIndex]===1){
                 snare.bang(contextPlayTime);
             }
             if(hihatSeq[rhythmIndex]===1){
                 hihat.bang(contextPlayTime,hihatOpen[rhythmIndex])
             }
-            
             advanceTime();
         }
         requestId = requestAnimationFrame(schedule);
@@ -155,6 +154,12 @@ function Collegram(){
         stopButton.innerHTML = "stop";
         stopButton.addEventListener('click', function(){
             handleStop();
+            try{
+                audioRecorder.finishRecording();
+            }
+            catch(e){
+                console.log(e);
+            }
         })
 
         var genButton = document.createElement("BUTTON");
@@ -177,7 +182,7 @@ function Collegram(){
         var masterVol = document.createElement("INPUT");
         masterVol.setAttribute("type","range");
         masterVol.setAttribute("min","0");
-        masterVol.setAttribute("max","100");
+        masterVol.setAttribute("max","200");
         masterVol.oninput = function() {
             var g = masterVol.value/100.0;
             masterMix.gain.value = g;
@@ -193,12 +198,40 @@ function Collegram(){
             tempo = t;
         }
 
+        var exportLoop = document.createElement("BUTTON");
+        exportLoop.innerHTML = "export loop";
+        exportLoop.addEventListener('click', function(){
+            handlePlay();
+            try{
+                audioRecorder.startRecording();
+            }
+            catch(e){
+                console.log(e);
+            }
+
+        })
+
+        audioRecorder.onComplete = function(recorder, blob){
+            var reader = new FileReader();
+            reader.onload = function(){
+                var buffer = new Buffer(reader.result);
+                fs.writeFile("./source/wav/hello.wav", buffer, {}, (err, res) => {
+                    if(err){
+                        console.error(err);
+                        return;
+                    }
+                })
+            }
+            reader.readAsArrayBuffer(blob)
+        }
+
         document.body.appendChild(playButton);
         document.body.appendChild(stopButton);
         document.body.appendChild(genButton);
         document.body.appendChild(genSeq);
         document.body.appendChild(masterVol);
         document.body.appendChild(tempoControl);
+        document.body.appendChild(exportLoop);
     }
 }
 
@@ -207,7 +240,7 @@ function Sequencer(length){
         this.length = length;
         for(var i = 0 ; i < this.length; i++){
             var randomValue = getRandomInt(0,16);
-            if(randomValue > 10){
+            if(randomValue > 15){
                 this.sequence[i] = 1;
             }
             else{
@@ -222,7 +255,7 @@ function Sequencer(length){
         this.randomiseSequence = function(){
             for(var i = 0 ; i < this.length; i++){
                 var randomValue = getRandomInt(0,16);
-                if(randomValue > 10){
+                if(randomValue > 15){
                     this.sequence[i] = 1;
                 }
                 else{

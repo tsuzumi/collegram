@@ -22,6 +22,7 @@ npm start
 install node.js 
 npm install electron --save-dev
 npm install soundbank-reverb
+npm install web-audio-recorder-js
 ```
 ### How To Use
 
